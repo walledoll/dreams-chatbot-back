@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Пользователь: авторизация по телефону
+model User {
+  id        String   @id @default(uuid())
+  phone     String   @unique @db.VarChar(20) // +79991234567
+  name      String?  @db.VarChar(100)
+  birthDate DateTime? @db.Date // только дата, без времени
+
+  dreams    Dream[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+// Сон: текст + интерпретация от ИИ
+model Dream {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  dreamText     String   @db.Text // то, что рассказал пользователь
+  interpretation String?  @db.Text // ответ от ИИ-сонника
+
+  // Опционально: для будущего расширения (ASR/TTS, аудиофайлы и т.д.)
+  audioUrl      String?  @db.VarChar(500) // URL записи голоса пользователя
+  ttsAudioUrl   String?  @db.VarChar(500) // URL озвученного ответа
+
+  createdAt     DateTime @default(now())
+
+  @@map("dreams")
+}
