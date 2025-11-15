@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'prisma/prisma.service';
@@ -7,9 +7,9 @@ import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
-  create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto) {
     const {phone, pass, birthDate, name} = createUserDto;
-    const hashedPass = bcrypt.hash(pass, 10);
+    const hashedPass = await bcrypt.hash(pass, 10);
     return this.prisma.user.create({
       data: {
         phone: phone,
@@ -25,6 +25,9 @@ export class UsersService {
   }
 
   findOneBy(phone: string) {
+    if (!phone || typeof phone !== 'string' || phone.trim() === '') {
+      throw new BadRequestException('Valid phone number is required');
+    }
     const user = this.prisma.user.findUnique({
       where: {phone}
     });

@@ -89,4 +89,22 @@ export class DreamsService {
     const stream = await this.ai.streamCompletion(prompt);
     yield* stream;
   }
+
+  async createPublicInterpretation(dreamText: string): Promise<string> {
+    const prompt = `
+      Ты — дружелюбный психолог-сонник.
+      Пользователь прислал сон:
+      "${dreamText}"
+
+      Дай тёплую, поддерживающую интерпретацию:
+      - Переформулируй сон
+      - Предложи 2–3 возможных смысла
+      - Задай 1–2 вопроса для рефлексии
+      - Заверши словами поддержки
+
+      Не используй эзотерику, магию или предсказания.
+    `;
+
+    return this.ai.generateInterpretation(prompt);
+  }
 }

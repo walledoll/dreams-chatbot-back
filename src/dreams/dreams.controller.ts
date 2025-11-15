@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, HttpException, HttpStatus, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, HttpException, HttpStatus, UsePipes, ValidationPipe, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { DreamsService } from './dreams.service';
 import { CreateDreamDto } from './dto/create-dream.dto';
 import { UpdateDreamDto } from './dto/update-dream.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { ThrottlerGuard } from '@nestjs/throttler';
+
 
 @UseGuards(AuthGuard)
 @Controller('dreams')
@@ -19,11 +21,30 @@ export class DreamsController {
   findAll() {
     return this.dreamsService.findAll();
   }
+  
+  @Post('interpret-public')
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  async interpretPublicDream(@Body('text') dreamText: string) {
+    if (!dreamText) {
+      throw new BadRequestException('Текст сна обязателен');
+    }
+
+    try {
+      // Генерируем интерпретацию БЕЗ userId
+      const interpretation = await this.dreamsService.createPublicInterpretation(dreamText);
+
+      return {
+        success: true,
+        interpretation,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('Не удалось обработать сон');
+    }
+  }
 
   @Post('interpret')
   @UsePipes(new ValidationPipe({ whitelist: true }))
-  async interpretDream(@Body() createDreamDto: CreateDreamDto, @Req() req) {
-    const { dreamText } = createDreamDto;
+  async interpretDreamById(@Body() dreamText: string, @Req() req) {
     const userId = req.user.id;
 
     if (!userId || !dreamText) {

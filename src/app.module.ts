@@ -7,11 +7,14 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { DreamsModule } from './dreams/dreams.module';
 import { DreamsService } from './dreams/dreams.service';
+import { PrismaService } from 'prisma/prisma.service';
+import { PrismaModule } from 'prisma/prisma.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 
 @Module({
-  imports: [UsersModule, DreamsModule, AuthModule, AiModule],
+  imports: [UsersModule, DreamsModule, AuthModule, AiModule, PrismaModule, ConfigModule],
   controllers: [AppController],
-  providers: [AppService, DreamsService, AiService],
+  providers: [AppService, DreamsService, AiService, PrismaService, ConfigService],
 })
 export class AppModule {}

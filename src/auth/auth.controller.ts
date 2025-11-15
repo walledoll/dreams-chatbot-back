@@ -22,10 +22,10 @@ export class AuthController {
     }
     @Post('login')
     async login(
-        @Body() { id, pass },
+        @Body() { phone, pass },
         @Res({ passthrough: true }) response: Response,
     ): Promise<{ message: string } | UnauthorizedException> {
-        const data = await this.authService.signIn(id, pass);
+        const data = await this.authService.signIn(phone, pass);
 
         if (!data) throw new UnauthorizedException();
 
@@ -37,6 +37,7 @@ export class AuthController {
             sameSite: 'strict',
             maxAge: 24 * 60 * 60 * 1000,
         });
+        console.log(access_token);
 
         return { message: 'Login successful' };
     }

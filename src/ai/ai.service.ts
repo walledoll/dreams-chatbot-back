@@ -8,7 +8,7 @@ export class AiService {
 
   constructor(private configService: ConfigService) {
     this.openai = new OpenAI({
-      apiKey: this.configService.get<string>('OPENAI_API_KEY'),
+      apiKey: this.configService.get<string>('API_KEY'),
       baseURL: "https://openai.api.proxyapi.ru/v1"
     });
   }
