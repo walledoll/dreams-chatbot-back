@@ -1,2 +1,2 @@
 -- DropIndex
-DROP INDEX "users_pass_key";
+DROP INDEX IF EXISTS "users_pass_key";
