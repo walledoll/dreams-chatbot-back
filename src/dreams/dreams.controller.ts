@@ -6,7 +6,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { ThrottlerGuard } from '@nestjs/throttler';
 
 
-@UseGuards(AuthGuard)
+
 @Controller('dreams')
 export class DreamsController {
   dreamService: any;
@@ -21,7 +21,7 @@ export class DreamsController {
   findAll() {
     return this.dreamsService.findAll();
   }
-  
+
   @Post('interpret-public')
   @UsePipes(new ValidationPipe({ whitelist: true }))
   async interpretPublicDream(@Body('text') dreamText: string) {
