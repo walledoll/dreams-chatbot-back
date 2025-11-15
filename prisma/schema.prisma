@@ -12,6 +12,7 @@ model User {
   id        String   @id @default(uuid())
   phone     String   @unique @db.VarChar(20) // +79991234567
   name      String?  @db.VarChar(100)
+  pass      String   @unique @db.VarChar(100)
   birthDate DateTime? @db.Date // только дата, без времени
 
   dreams    Dream[]

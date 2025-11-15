@@ -1,15 +1,17 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { DreamService } from './dream/dream.service';
-import { DreamModule } from './dream/dream.module';
-import { DreamsModule } from './dreams/dreams.module';
+import { AiModule } from './ai/ai.module';
+import { AiService } from './ai/ai.service';
+import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { DreamModule } from './dream/dream.module';
+import { DreamsModule } from './dreams/dreams.module';
+import { DreamsService } from './dreams/dreams.service';
+
 
 @Module({
-  imports: [DreamModule, UsersModule, DreamsModule],
+  imports: [UsersModule, DreamsModule, AuthModule, AiModule],
   controllers: [AppController],
-  providers: [AppService, DreamService],
+  providers: [AppService, DreamsService, AiService],
 })
 export class AppModule {}
