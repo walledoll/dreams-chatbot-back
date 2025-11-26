@@ -16,11 +16,46 @@ model User {
   birthDate DateTime? @db.Date // только дата, без времени
 
   dreams    Dream[]
-  
+  chats     Chat[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("users")
+}
+
+// Чат: личный или групповой диалог с ботом
+model Chat {
+  id        String   @id @default(uuid())
+  title     String   @db.VarChar(100) // "Мои сны", "Семейный чат" и т.д.
+  type      ChatType @default(INDIVIDUAL) // индивидуальный или групповой
+  status    ChatStatus @default(ACTIVE)  // активный или архивный
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  messages  Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("chats")
+}
+
+// Сообщение в чате
+model Message {
+  id        String     @id @default(uuid())
+  chatId    String
+  chat      Chat       @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  role      MessageRole
+  content   String     @db.Text // текст сообщения
+  audioUrl  String?    @db.VarChar(500) // опционально: голосовое сообщение
+  metadata  Json?      // доп. данные: например, { "ttsUsed": true, "source": "telegram" }
+
+  createdAt DateTime   @default(now())
+
+  @@map("messages")
 }
 
 // Сон: текст + интерпретация от ИИ
@@ -29,14 +64,29 @@ model Dream {
   userId        String
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  dreamText     String   @db.Text // то, что рассказал пользователь
-  interpretation String?  @db.Text // ответ от ИИ-сонника
+  dreamText     String   @db.Text
+  interpretation String?  @db.Text
 
-  // Опционально: для будущего расширения (ASR/TTS, аудиофайлы и т.д.)
-  audioUrl      String?  @db.VarChar(500) // URL записи голоса пользователя
-  ttsAudioUrl   String?  @db.VarChar(500) // URL озвученного ответа
+  audioUrl      String?  @db.VarChar(500)
+  ttsAudioUrl   String?  @db.VarChar(500)
 
   createdAt     DateTime @default(now())
 
   @@map("dreams")
+}
+
+// ENUMs
+enum ChatType {
+  INDIVIDUAL
+  GROUP
+}
+
+enum ChatStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum MessageRole {
+  USER      // сообщение от пользователя
+  ASSISTANT // сообщение от бота (ИИ, сонник и т.д.)
 }

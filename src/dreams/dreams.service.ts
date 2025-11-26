@@ -68,7 +68,7 @@ export class DreamsService {
     return this.ai.generateInterpretation(prompt);
   }
 
-  async *streamInterpretation(dreamText: string, userId?: string, ): AsyncGenerator<string> {
+  async *streamInterpretation(dreamText: string, userId?: string): AsyncGenerator<string> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     const pastDreams = await this.prisma.dream.findMany({
       where: { userId },
