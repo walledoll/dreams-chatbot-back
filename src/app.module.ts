@@ -11,10 +11,11 @@ import { PrismaService } from 'prisma/prisma.service';
 import { PrismaModule } from 'prisma/prisma.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DreamGateway } from './dreams/dreams.gateway';
+import { ChatsModule } from './chats/chats.module';
 
 
 @Module({
-  imports: [UsersModule, DreamsModule, AuthModule, AiModule, PrismaModule, ConfigModule],
+  imports: [UsersModule, DreamsModule, AuthModule, AiModule, PrismaModule, ConfigModule, ChatsModule],
   controllers: [AppController],
   providers: [AppService, DreamsService, AiService, PrismaService, ConfigService, DreamGateway],
 })

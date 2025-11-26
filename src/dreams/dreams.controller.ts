@@ -6,7 +6,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { ThrottlerGuard } from '@nestjs/throttler';
 
 
-
+@UseGuards(AuthGuard)
 @Controller('dreams')
 export class DreamsController {
   dreamService: any;
@@ -22,6 +22,7 @@ export class DreamsController {
     return this.dreamsService.findAll();
   }
 
+  @UseGuards()
   @Post('interpret-public')
   @UsePipes(new ValidationPipe({ whitelist: true }))
   async interpretPublicDream(@Body('text') dreamText: string) {
@@ -31,7 +32,7 @@ export class DreamsController {
 
     try {
       // Генерируем интерпретацию БЕЗ userId
-      const interpretation = await this.dreamsService.createPublicInterpretation(dreamText);
+      const interpretation = await this.dreamsService.createInterpretation(dreamText);
 
       return {
         success: true,

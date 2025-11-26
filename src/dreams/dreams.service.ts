@@ -21,7 +21,7 @@ export class DreamsService {
     return this.prisma.dream.findMany();
   }
 
-  async createInterpretation(userId: string, dreamText: string): Promise<string> {
+  async createInterpretation(dreamText: string, userId?: string): Promise<string> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     const pastDreams = await this.prisma.dream.findMany({
       where: { userId },
@@ -39,7 +39,7 @@ export class DreamsService {
       .map(d => `Сон: ${d.dreamText}\nИнтерпретация: ${d.interpretation || '—'}`)
       .join('\n---\n');
 
-    const prompt = `
+    const prompt = userId ? `
       Имя пользователя: ${user.name || 'друг'}
       ${age ? `Возраст: ${age} лет` : ''}
 
@@ -50,12 +50,25 @@ export class DreamsService {
       "${dreamText}"
 
       Дай тёплую, психологическую интерпретацию: переформулируй сон, предложи 2–3 смысла, задай вопрос для рефлексии, заверши поддержкой. Не используй эзотерику.
+    `:
+    `
+      Ты — дружелюбный психолог-сонник.
+      Пользователь прислал сон:
+      "${dreamText}"
+
+      Дай тёплую, поддерживающую интерпретацию:
+      - Переформулируй сон
+      - Предложи 2–3 возможных смысла
+      - Задай 1–2 вопроса для рефлексии
+      - Заверши словами поддержки
+
+      Не используй эзотерику, магию или предсказания.
     `;
 
     return this.ai.generateInterpretation(prompt);
   }
 
-  async *streamInterpretation(userId: string, dreamText: string): AsyncGenerator<string> {
+  async *streamInterpretation(dreamText: string, userId?: string, ): AsyncGenerator<string> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     const pastDreams = await this.prisma.dream.findMany({
       where: { userId },
@@ -71,27 +84,22 @@ export class DreamsService {
       .map(d => `Сон: ${d.dreamText}\nИнтерпретация: ${d.interpretation || '—'}`)
       .join('\n---\n');
 
-    const prompt = `
-      Ты — психолог-сонник. Ты помогаешь людям понимать свои сны через призму современной психологии, а не эзотерики.
-      Имя пользователя: ${user?.name || 'друг'}
+    if(!user)
+      throw new NotFoundException();
+
+    const prompt = userId ? `
+      Имя пользователя: ${user.name || 'друг'}
       ${age ? `Возраст: ${age} лет` : ''}
 
-      Контекст предыдущих снов:
+      Контекст прошлых снов:
       ${context || 'Нет предыдущих снов'}
 
       Текущий сон:
       "${dreamText}"
 
-      Ответь тепло, без жаргона, как заботливый психолог. Сначала переформулируй сон, затем дай 2–3 интерпретации, задай вопрос для рефлексии и заверши поддержкой.
-    `;
-
-    // Используем streaming от OpenAI
-    const stream = await this.ai.streamCompletion(prompt);
-    yield* stream;
-  }
-
-  async createPublicInterpretation(dreamText: string): Promise<string> {
-    const prompt = `
+      Дай тёплую, психологическую интерпретацию: переформулируй сон, предложи 2–3 смысла, задай вопрос для рефлексии, заверши поддержкой. Не используй эзотерику.
+    `:
+    `
       Ты — дружелюбный психолог-сонник.
       Пользователь прислал сон:
       "${dreamText}"
@@ -105,6 +113,8 @@ export class DreamsService {
       Не используй эзотерику, магию или предсказания.
     `;
 
-    return this.ai.generateInterpretation(prompt);
+    // Используем streaming от OpenAI
+    const stream = await this.ai.streamCompletion(prompt);
+    yield* stream;
   }
 }
